@@ -16,7 +16,7 @@ const Theme = () => {
   return (
     <Menubar className="relative border-none bg-transparent shadow-none">
       <MenubarMenu>
-        <MenubarTrigger className="focus:bg-light-900 data-[state=open]:bg-light-900 dark:focus:bg-dark-200 dark:data-[state=open]:bg-dark-200">
+        <MenubarTrigger className="hover:cursor-pointer focus:bg-light-900 data-[state=open]:bg-light-900 dark:focus:bg-dark-200 dark:data-[state=open]:bg-dark-200">
           {mode === 'dark' ? (
             <Image
               src="/assets/icons/moon.svg"
@@ -37,7 +37,7 @@ const Theme = () => {
           {themes.map((item, index) => (
             <MenubarItem
               key={index}
-              className="flex items-center gap-4 px-2.5 py-2 hover:bg-light-900 dark:hover:bg-dark-200 dark:focus:bg-dark-400"
+              className="flex items-center gap-4 px-2.5 py-2 hover:bg-light-900 focus:bg-gray-200 dark:hover:bg-dark-200 dark:focus:bg-dark-400"
               onClick={() => {
                 setMode(item.value);
 

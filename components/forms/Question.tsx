@@ -41,6 +41,7 @@ const Question = () => {
 
     try {
       // TODO: Create the Question
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     } catch (error) {
     } finally {
       setIsSubmitting(false);

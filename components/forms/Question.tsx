@@ -1,11 +1,9 @@
 'use client';
 import React, { useRef, useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-
-import { Button } from '@/components/ui/button';
+import { useForm } from 'react-hook-form';
 import {
   Form,
   FormControl,
@@ -16,16 +14,26 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useForm } from 'react-hook-form';
+import { Button } from '../ui/button';
 import { QuestionSchema } from '@/lib/validations';
-import Image from 'next/image';
 import { Badge } from '../ui/badge';
+import Image from 'next/image';
+import { createQuestion } from '@/lib/actions/question.action';
+import { useRouter, usePathname } from 'next/navigation';
 
 const type: any = 'create';
 
-const Question = () => {
+interface Props {
+  mongoUserId: string;
+}
+
+const Question = ({ mongoUserId }: Props) => {
   const editorRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // 1. Define your form.
   const form = useForm<z.infer<typeof QuestionSchema>>({
     resolver: zodResolver(QuestionSchema),
     defaultValues: {
@@ -40,8 +48,16 @@ const Question = () => {
     setIsSubmitting(true);
 
     try {
-      // TODO: Create the Question
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await createQuestion({
+        title: values.title,
+        content: values.explanation,
+        tags: values.tags,
+        author: JSON.parse(mongoUserId),
+        path: pathname,
+      });
+
+      // navigate to home page
+      router.push('/');
     } catch (error) {
     } finally {
       setIsSubmitting(false);

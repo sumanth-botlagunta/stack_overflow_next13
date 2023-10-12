@@ -8,7 +8,7 @@ export async function getUserById(userId: string) {
     connectToDataBase();
 
     const user = await User.findOne({ clerkId: userId });
-    return user;
+    return user._id;
   } catch (error) {
     console.log(error);
     throw error;

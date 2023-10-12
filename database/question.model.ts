@@ -21,6 +21,7 @@ const questionSchema = new Schema<IQuestion>({
   downvotes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   answers: [{ type: Schema.Types.ObjectId, ref: 'Answer' }],
   createdAt: { type: Date, default: Date.now },
+  author: { type: Schema.Types.ObjectId, ref: 'User' },
 });
 
 const Question =

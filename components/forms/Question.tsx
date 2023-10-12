@@ -20,11 +20,12 @@ import { Badge } from '../ui/badge';
 import Image from 'next/image';
 import { createQuestion } from '@/lib/actions/question.action';
 import { useRouter, usePathname } from 'next/navigation';
+import { Schema } from 'mongoose';
 
 const type: any = 'create';
 
 interface Props {
-  mongoUserId: string;
+  mongoUserId: Schema.Types.ObjectId;
 }
 
 const Question = ({ mongoUserId }: Props) => {
@@ -52,7 +53,7 @@ const Question = ({ mongoUserId }: Props) => {
         title: values.title,
         content: values.explanation,
         tags: values.tags,
-        author: JSON.parse(mongoUserId),
+        author: mongoUserId,
         path: pathname,
       });
 

@@ -25,15 +25,17 @@ const Metric = ({
     <>
       <Image
         src={imgUrl}
-        width={16}
-        height={16}
+        width={isAuthor ? 28 : 16}
+        height={isAuthor ? 28 : 16}
         alt={alt}
-        className={`object-contain ${href ? 'rounded-full' : ''}`}
+        className={`object-contain ${href ? 'rounded-full' : ''} ${
+          isAuthor ? 'max-xs:hidden' : ''
+        }`}
       />
 
       <p
         className={`${textStyles} flex ${
-          isAuthor ? 'flex-col' : 'items-center'
+          isAuthor ? 'ml-2 flex-col' : 'items-center'
         } gap-1`}
       >
         {value}

@@ -11,10 +11,10 @@ import {
 import { revalidatePath } from 'next/cache';
 import Question from '@/database/question.model';
 
-export async function getUserById(userId: string) {
+export async function getUserById(params: any) {
   try {
     connectToDataBase();
-
+    const { userId } = params;
     const user = await User.findOne({ clerkId: userId });
     return user._id;
   } catch (error) {

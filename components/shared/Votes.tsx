@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { downvoteAnswer, upvoteAnswer } from '@/lib/actions/answer.action';
 import {
   downvoteQuestion,
@@ -7,8 +7,9 @@ import {
 } from '@/lib/actions/question.action';
 import { formatAndDivideNumber } from '@/lib/utils';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { toggleSaveQuestion } from '@/lib/actions/user.action';
+import { viewQuestion } from '@/lib/actions/interaction.action';
 
 type Props = {
   type: 'Question' | 'Answer';
@@ -31,8 +32,18 @@ const Votes = ({
   hasdownVoted,
   hasSaved,
 }: Props) => {
+  const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (type === 'Question') {
+      viewQuestion({
+        userId: userId ? JSON.parse(userId) : undefined,
+        questionId: JSON.parse(itemId),
+      });
+    }
+  }, [itemId, pathname, router, userId, type]);
 
   const handleVote = async (voteType: 'upvote' | 'downvote') => {
     if (!userId || loading) return;

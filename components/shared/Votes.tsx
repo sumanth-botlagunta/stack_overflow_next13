@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { downvoteAnswer, upvoteAnswer } from '@/lib/actions/answer.action';
 import {
   downvoteQuestion,
@@ -30,50 +31,60 @@ const Votes = ({
   hasSaved,
 }: Props) => {
   const pathname = usePathname();
+  const [loading, setLoading] = useState(false);
+
   const handleVote = async (voteType: 'upvote' | 'downvote') => {
-    if (!userId) return;
-    if (voteType === 'upvote') {
-      if (type === 'Question') {
-        await upvoteQuestion({
-          userId: JSON.parse(userId),
-          questionId: JSON.parse(itemId),
-          path: pathname,
-          hasupVoted,
-          hasdownVoted,
-        });
+    if (!userId || loading) return;
+    setLoading(true);
+    try {
+      if (voteType === 'upvote') {
+        if (type === 'Question') {
+          await upvoteQuestion({
+            userId: JSON.parse(userId),
+            questionId: JSON.parse(itemId),
+            path: pathname,
+            hasupVoted,
+            hasdownVoted,
+          });
+        }
+
+        if (type === 'Answer') {
+          await upvoteAnswer({
+            userId: JSON.parse(userId),
+            answerId: JSON.parse(itemId),
+            path: pathname,
+            hasupVoted,
+            hasdownVoted,
+          });
+        }
       }
 
-      if (type === 'Answer') {
-        await upvoteAnswer({
-          userId: JSON.parse(userId),
-          answerId: JSON.parse(itemId),
-          path: pathname,
-          hasupVoted,
-          hasdownVoted,
-        });
-      }
-    }
+      if (voteType === 'downvote') {
+        if (type === 'Question') {
+          await downvoteQuestion({
+            userId: JSON.parse(userId),
+            questionId: JSON.parse(itemId),
+            path: pathname,
+            hasupVoted,
+            hasdownVoted,
+          });
+        }
 
-    if (voteType === 'downvote') {
-      if (type === 'Question') {
-        await downvoteQuestion({
-          userId: JSON.parse(userId),
-          questionId: JSON.parse(itemId),
-          path: pathname,
-          hasupVoted,
-          hasdownVoted,
-        });
+        if (type === 'Answer') {
+          await downvoteAnswer({
+            userId: JSON.parse(userId),
+            answerId: JSON.parse(itemId),
+            path: pathname,
+            hasupVoted,
+            hasdownVoted,
+          });
+        }
       }
-
-      if (type === 'Answer') {
-        await downvoteAnswer({
-          userId: JSON.parse(userId),
-          answerId: JSON.parse(itemId),
-          path: pathname,
-          hasupVoted,
-          hasdownVoted,
-        });
-      }
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
     // TODO: toast notification
   };
@@ -91,7 +102,9 @@ const Votes = ({
             width={18}
             height={18}
             alt="upvote"
-            className="cursor-pointer"
+            className={`cursor-pointer ${
+              loading ? 'pointer-events-none opacity-50' : ''
+            }`}
             onClick={() => handleVote('upvote')}
           />
 
@@ -112,7 +125,9 @@ const Votes = ({
             width={18}
             height={18}
             alt="downvote"
-            className="cursor-pointer"
+            className={`cursor-pointer ${
+              loading ? 'pointer-events-none opacity-50' : ''
+            }`}
             onClick={() => handleVote('downvote')}
           />
 

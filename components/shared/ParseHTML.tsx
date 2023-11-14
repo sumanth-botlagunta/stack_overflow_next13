@@ -37,7 +37,11 @@ const ParseHTML = ({ data }: Props) => {
     Prism.highlightAll();
   }, []);
 
-  return <div className="dark:text-white">{parse(data)}</div>;
+  return (
+    <div className="max-w-5xl overflow-x-scroll dark:text-white">
+      {parse(data)}
+    </div>
+  );
 };
 
 export default ParseHTML;

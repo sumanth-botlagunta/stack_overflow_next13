@@ -12,12 +12,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const Page = async ({ params }: { params: { id: string } }) => {
-  const { userId: clerkId } = auth();
+  const { userId } = auth();
 
   let mongoUser;
 
-  if (clerkId) {
-    mongoUser = await getUserById({ userId: clerkId });
+  if (userId) {
+    mongoUser = await getUserById({ userId });
   }
   const result = await getQuestionById({ questionId: params.id });
   return (
@@ -48,7 +48,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
               hasupVoted={result.upvotes.includes(mongoUser._id)}
               downvotes={result.downvotes.length}
               hasdownVoted={result.downvotes.includes(mongoUser._id)}
-              hasSaved={mongoUser.saved?.includes(result._id)}
+              hasSaved={mongoUser.saved.includes(result._id)}
             />
           </div>
         </div>

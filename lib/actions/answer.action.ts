@@ -124,6 +124,10 @@ export async function deleteAnswer(params: DeleteAnswerParams) {
   try {
     connectToDataBase();
     const { answerId, path } = params;
+    const answer = await Answer.findById(answerId);
+    if (!answer) {
+      throw new Error('Answer not found');
+    }
     await Answer.deleteOne({ _id: answerId });
     await Interaction.deleteMany({ answer: answerId });
     await Question.updateMany(

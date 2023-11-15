@@ -12,6 +12,7 @@ import Tag from '@/database/tag.model';
 import { revalidatePath } from 'next/cache';
 import console from 'console';
 import User from '@/database/user.model';
+import escapeStringRegexp from 'escape-string-regexp';
 
 export async function createQuestion(params: CreateQuestionParams) {
   try {
@@ -25,8 +26,10 @@ export async function createQuestion(params: CreateQuestionParams) {
 
     const tagDocuments = [];
     for (const tag of tags) {
+      const escapedTag = escapeStringRegexp(tag);
+
       const existingTag = await Tag.findOneAndUpdate(
-        { name: { $regex: new RegExp(`^${tag}$`, 'i') } },
+        { name: { $regex: new RegExp(`^${escapedTag}$`, 'i') } },
         { $setOnInsert: { name: tag }, $push: { questions: question._id } },
         { upsert: true, new: true }
       );

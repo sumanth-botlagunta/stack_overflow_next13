@@ -10,6 +10,7 @@ import {
 import Tag, { ITag } from '@/database/tag.model';
 import { FilterQuery } from 'mongoose';
 import Question from '@/database/question.model';
+import escapeStringRegexp from 'escape-string-regexp';
 
 export async function getTopInteractedTags(params: GetTopInteractedTagsParams) {
   try {
@@ -37,7 +38,13 @@ export async function getTopInteractedTags(params: GetTopInteractedTagsParams) {
 export async function getAllTags(params: GetAllTagsParams) {
   try {
     connectToDataBase();
-    const tags = await Tag.find({});
+    const { searchQuery } = params;
+    const escapedSearchQuery = escapeStringRegexp(searchQuery || '');
+    const query: FilterQuery<typeof Tag> = {};
+    if (searchQuery) {
+      query.$or = [{ name: { $regex: new RegExp(escapedSearchQuery, 'i') } }];
+    }
+    const tags = await Tag.find(query);
     return { tags };
   } catch (error) {
     console.log(error);

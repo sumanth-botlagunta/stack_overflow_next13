@@ -4,6 +4,8 @@ import Question from '@/database/question.model';
 import { connectToDataBase } from '../mongoose';
 import {
   CreateQuestionParams,
+  DeleteQuestionParams,
+  EditQuestionParams,
   GetQuestionByIdParams,
   GetQuestionsParams,
   QuestionVoteParams,
@@ -13,6 +15,8 @@ import { revalidatePath } from 'next/cache';
 import console from 'console';
 import User from '@/database/user.model';
 import escapeStringRegexp from 'escape-string-regexp';
+import Answer from '@/database/answer.model';
+import Interaction from '@/database/interaction.model';
 
 export async function createQuestion(params: CreateQuestionParams) {
   try {
@@ -86,29 +90,31 @@ export async function getQuestionById(params: GetQuestionByIdParams) {
   }
 }
 
-export async function upvoteQuestion(params: QuestionVoteParams){
+export async function upvoteQuestion(params: QuestionVoteParams) {
   try {
     connectToDataBase();
-    const {hasupVoted, hasdownVoted, path, questionId, userId} = params;
+    const { hasupVoted, hasdownVoted, path, questionId, userId } = params;
     let updateQuery = {};
-    if(hasupVoted){
+    if (hasupVoted) {
       updateQuery = {
-        $pull: {upvotes: userId},
-      }
-    }else if(hasdownVoted){
+        $pull: { upvotes: userId },
+      };
+    } else if (hasdownVoted) {
       updateQuery = {
-        $pull: {downvotes: userId},
-        $push: {upvotes: userId},
-      }
-    }else{
+        $pull: { downvotes: userId },
+        $push: { upvotes: userId },
+      };
+    } else {
       updateQuery = {
-        $addToSet: {upvotes: userId},
-      }
+        $addToSet: { upvotes: userId },
+      };
     }
 
-    const question = await Question.findByIdAndUpdate(questionId, updateQuery, {new: true})
+    const question = await Question.findByIdAndUpdate(questionId, updateQuery, {
+      new: true,
+    });
 
-    if(!question){
+    if (!question) {
       throw new Error('Question not found');
     }
     // TODO: authors reputation
@@ -118,31 +124,33 @@ export async function upvoteQuestion(params: QuestionVoteParams){
     console.log(error);
     throw error;
   }
-}; 
+}
 
-export async function downvoteQuestion(params: QuestionVoteParams){
+export async function downvoteQuestion(params: QuestionVoteParams) {
   try {
     connectToDataBase();
-    const {hasupVoted, hasdownVoted, path, questionId, userId} = params;
+    const { hasupVoted, hasdownVoted, path, questionId, userId } = params;
     let updateQuery = {};
-    if(hasdownVoted){
+    if (hasdownVoted) {
       updateQuery = {
-        $pull: {downvotes: userId},
-      }
-    }else if(hasupVoted){
+        $pull: { downvotes: userId },
+      };
+    } else if (hasupVoted) {
       updateQuery = {
-        $pull: {upvotes: userId},
-        $push: {downvotes: userId},
-      }
-    }else{
+        $pull: { upvotes: userId },
+        $push: { downvotes: userId },
+      };
+    } else {
       updateQuery = {
-        $addToSet: {downvotes: userId},
-      }
+        $addToSet: { downvotes: userId },
+      };
     }
 
-    const question = await Question.findByIdAndUpdate(questionId, updateQuery, {new: true})
+    const question = await Question.findByIdAndUpdate(questionId, updateQuery, {
+      new: true,
+    });
 
-    if(!question){
+    if (!question) {
       throw new Error('Question not found');
     }
 
@@ -153,4 +161,39 @@ export async function downvoteQuestion(params: QuestionVoteParams){
     console.log(error);
     throw error;
   }
-}; 
+}
+
+export async function editQuestion(params: EditQuestionParams) {
+  try {
+    connectToDataBase();
+    const { questionId, title, content, path } = params;
+    await Question.findByIdAndUpdate(
+      questionId,
+      { title, content },
+      { new: true }
+    );
+
+    revalidatePath(path);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+export async function deleteQuestion(params: DeleteQuestionParams) {
+  try {
+    connectToDataBase();
+    const { questionId, path } = params;
+    await Question.deleteOne({ _id: questionId });
+    await Answer.deleteMany({ question: questionId });
+    await Interaction.deleteMany({ question: questionId });
+    await Tag.updateMany(
+      { questions: questionId },
+      { $pull: { questions: questionId } }
+    );
+    revalidatePath(path);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}

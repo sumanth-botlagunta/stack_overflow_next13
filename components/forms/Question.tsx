@@ -18,31 +18,33 @@ import { Button } from '../ui/button';
 import { QuestionSchema } from '@/lib/validations';
 import { Badge } from '../ui/badge';
 import Image from 'next/image';
-import { createQuestion } from '@/lib/actions/question.action';
+import { createQuestion, editQuestion } from '@/lib/actions/question.action';
 import { useRouter, usePathname } from 'next/navigation';
 import { Schema } from 'mongoose';
 import { useTheme } from '@/context/ThemeProvider';
 
-const type: any = 'create';
-
 interface Props {
   mongoUserId: Schema.Types.ObjectId;
+  type?: 'EDIT' | 'CREATE';
+  questionDetails?: string;
 }
 
-const Question = ({ mongoUserId }: Props) => {
+const Question = ({ mongoUserId, type, questionDetails }: Props) => {
   const { mode } = useTheme();
   const editorRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const parsedQuestionDetails = JSON.parse(questionDetails || '{}') || {};
+  const groupedTags = parsedQuestionDetails?.tags?.map((tag: any) => tag.name);
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof QuestionSchema>>({
     resolver: zodResolver(QuestionSchema),
     defaultValues: {
-      title: '',
-      explanation: '',
-      tags: [],
+      title: parsedQuestionDetails?.title || '',
+      explanation: parsedQuestionDetails?.content || '',
+      tags: groupedTags || [],
     },
   });
 
@@ -51,16 +53,26 @@ const Question = ({ mongoUserId }: Props) => {
     setIsSubmitting(true);
 
     try {
-      await createQuestion({
-        title: values.title,
-        content: values.explanation,
-        tags: values.tags,
-        author: mongoUserId,
-        path: pathname,
-      });
+      if (type === 'EDIT') {
+        await editQuestion({
+          title: values.title,
+          content: values.explanation,
+          path: pathname,
+          questionId: parsedQuestionDetails?._id,
+        });
+        router.push(`/question/${parsedQuestionDetails?._id}`);
+      } else {
+        await createQuestion({
+          title: values.title,
+          content: values.explanation,
+          tags: values.tags,
+          author: mongoUserId,
+          path: pathname,
+        });
 
-      // navigate to home page
-      router.push('/');
+        // navigate to home page
+        router.push('/');
+      }
     } catch (error) {
     } finally {
       setIsSubmitting(false);
@@ -148,7 +160,7 @@ const Question = ({ mongoUserId }: Props) => {
                   }}
                   onBlur={field.onBlur}
                   onEditorChange={(content) => field.onChange(content)}
-                  initialValue=""
+                  initialValue={field.value}
                   init={{
                     height: 350,
                     menubar: false,
@@ -195,12 +207,18 @@ const Question = ({ mongoUserId }: Props) => {
               <FormLabel className="paragraph-semibold text-dark400_light800">
                 Tags <span className="text-primary-500">*</span>
               </FormLabel>
+              {type !== 'EDIT' && (
+                <FormMessage className="text-orange-500">
+                  tags cannot be edited once created
+                </FormMessage>
+              )}
               <FormControl className="mt-3.5">
                 <>
                   <Input
                     className="no-focus paragraph-regular background-light900_dark300 light-border-2 text-dark300_light700 min-h-[56px] border"
                     placeholder="Add tags..."
                     onKeyDown={(e) => handleInputKeyDown(e, field)}
+                    disabled={type === 'EDIT'}
                   />
 
                   {field.value.length > 0 && (
@@ -225,6 +243,11 @@ const Question = ({ mongoUserId }: Props) => {
                   )}
                 </>
               </FormControl>
+              {type === 'EDIT' && (
+                <FormMessage className="text-red-500">
+                  You cannot edit tags once created
+                </FormMessage>
+              )}
               <FormDescription className="body-regular mt-2.5 text-light-500">
                 Add up to 3 tags to describe what your question is about. You
                 need to press enter to add a tag.
@@ -239,9 +262,9 @@ const Question = ({ mongoUserId }: Props) => {
           disabled={isSubmitting}
         >
           {isSubmitting ? (
-            <>{type === 'edit' ? 'Editing...' : 'Posting...'}</>
+            <>{type === 'EDIT' ? 'Editing...' : 'Posting...'}</>
           ) : (
-            <>{type === 'edit' ? 'Edit Question' : 'Ask a Question'}</>
+            <>{type === 'EDIT' ? 'Edit Question' : 'Ask a Question'}</>
           )}
         </Button>
       </form>

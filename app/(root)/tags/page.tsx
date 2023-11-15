@@ -3,6 +3,7 @@ import NoResult from '@/components/shared/NoResult';
 import LocalSearchbar from '@/components/shared/search/LocalSearchbar';
 import { TagFilters } from '@/constants/filters';
 import { getAllTags } from '@/lib/actions/tags.action';
+import { SearchParamsProps } from '@/types';
 import Link from 'next/link';
 
 interface result {
@@ -13,8 +14,8 @@ interface result {
   }[];
 }
 
-export default async function page() {
-  const result: result = await getAllTags({});
+export default async function page({ searchParams }: SearchParamsProps) {
+  const result: result = await getAllTags({ searchQuery: searchParams.q });
   return (
     <>
       <h1 className="h1-bold text-dark100_light900">Tags</h1>

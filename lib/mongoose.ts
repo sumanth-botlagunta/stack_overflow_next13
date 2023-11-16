@@ -10,7 +10,7 @@ export const connectToDataBase = async () => {
   }
 
   if (isConnected) {
-    return console.info('Already connected to DB');
+    return;
   }
 
   try {

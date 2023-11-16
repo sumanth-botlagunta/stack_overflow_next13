@@ -45,6 +45,15 @@ export async function createQuestion(params: CreateQuestionParams) {
     await Question.findByIdAndUpdate(question._id, {
       $push: { tags: { $each: tagDocuments } },
     });
+    await Interaction.create({
+      user: author,
+      action: 'ask_question',
+      question: question._id,
+      tags: tagDocuments,
+    });
+
+    await User.findByIdAndUpdate(author, { $inc: { reputation: 5 } });
+
     revalidatePath(path);
 
     return question;
@@ -57,21 +66,43 @@ export async function createQuestion(params: CreateQuestionParams) {
 export async function getQuestions(params: GetQuestionsParams) {
   try {
     connectToDataBase();
-    const { searchQuery } = params;
-    // const escapedSearchQuery = escapeStringRegexp(searchQuery);
+    const { searchQuery, filter, page = 1, pageSize = 10 } = params;
+    const skipAmount = (page - 1) * pageSize;
+    const escapedSearchQuery = escapeStringRegexp(searchQuery || '');
     const query: FilterQuery<typeof Question> = {};
     if (searchQuery) {
       query.$or = [
-        { title: { $regex: new RegExp(searchQuery, 'i') } },
-        { content: { $regex: new RegExp(searchQuery, 'i') } },
+        { title: { $regex: new RegExp(escapedSearchQuery, 'i') } },
+        { content: { $regex: new RegExp(escapedSearchQuery, 'i') } },
       ];
+    }
+
+    let sortOptions = {};
+    switch (filter) {
+      case 'newest':
+        sortOptions = { createdAt: -1 };
+        break;
+      case 'frequent':
+        sortOptions = { views: -1 };
+        break;
+      case 'unanswered':
+        query.answers = { $size: 0 };
+        break;
+      default:
+        break;
     }
     const questions = await Question.find(query)
       .populate({ path: 'tags', model: Tag })
       .populate({ path: 'author', model: User })
-      .sort({ createdAt: -1 });
+      .skip(skipAmount)
+      .limit(pageSize)
+      .sort(sortOptions);
 
-    return { questions };
+    const totalQuestions = await Question.countDocuments(query);
+
+    const isNext = totalQuestions > skipAmount + questions.length;
+
+    return { questions, isNext };
   } catch (error) {
     console.log(error);
     throw error;
@@ -127,7 +158,13 @@ export async function upvoteQuestion(params: QuestionVoteParams) {
     if (!question) {
       throw new Error('Question not found');
     }
-    // TODO: authors reputation
+    await User.findByIdAndUpdate(userId, {
+      $inc: { reputation: hasupVoted ? -1 : 1 },
+    });
+
+    await User.findByIdAndUpdate(question.author, {
+      $inc: { reputation: hasupVoted ? -10 : 10 },
+    });
 
     revalidatePath(path);
   } catch (error) {
@@ -164,7 +201,14 @@ export async function downvoteQuestion(params: QuestionVoteParams) {
       throw new Error('Question not found');
     }
 
-    // TODO: authors reputation
+    await User.findByIdAndUpdate(userId, {
+      $inc: { reputation: hasdownVoted ? -2 : 2 },
+    });
+
+    await User.findByIdAndUpdate(question.author, {
+      $inc: { reputation: hasdownVoted ? -10 : 10 },
+    });
+
 
     revalidatePath(path);
   } catch (error) {

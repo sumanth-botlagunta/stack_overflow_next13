@@ -11,7 +11,16 @@ import { auth } from '@clerk/nextjs';
 import Image from 'next/image';
 import Link from 'next/link';
 
-const Page = async ({ params }: { params: { id: string } }) => {
+type Props = {
+  params: {
+    id: string;
+  };
+  searchParams: {
+    filter: string;
+  };
+};
+
+const Page = async ({ params, searchParams }: Props) => {
   const { userId } = auth();
 
   let mongoUser;
@@ -96,6 +105,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
         questionId={result._id}
         userId={JSON.stringify(mongoUser._id)}
         totalAnswers={result.answers.length}
+        filter={searchParams.filter}
       />
 
       <Answer

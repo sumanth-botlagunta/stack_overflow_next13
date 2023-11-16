@@ -31,7 +31,8 @@ export async function createAnswer(params: CreateAnswerParams) {
 export async function getAnswers(params: GetAnswersParams) {
   try {
     connectToDataBase();
-    const { questionId, sortBy } = params;
+    const { questionId, sortBy, page = 1, pageSize = 10 } = params;
+    const skipAmount = (page - 1) * pageSize;
     let sortOptions = {};
 
     switch (sortBy) {
@@ -58,8 +59,12 @@ export async function getAnswers(params: GetAnswersParams) {
         model: User,
         select: '_id name picture clerkId',
       })
-      .sort(sortOptions);
-    return answers;
+      .sort(sortOptions)
+      .skip(skipAmount)
+      .limit(pageSize);
+    const totalAnswers = await Answer.countDocuments({ question: questionId });
+    const isNext = totalAnswers > skipAmount + pageSize;
+    return { answers, isNext };
   } catch (error) {
     console.log(error);
     throw error;

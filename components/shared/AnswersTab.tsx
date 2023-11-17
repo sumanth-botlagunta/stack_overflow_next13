@@ -16,17 +16,21 @@ const AnswersTab = async ({ searchParams, userId, clerkId }: Props) => {
 
   return (
     <>
-      {result.answers.map((item) => (
-        <AnswerCard
-          key={item._id}
-          clerkId={clerkId}
-          _id={item._id}
-          question={item.question}
-          author={item.author}
-          upvotes={item.upvotes.length}
-          createdAt={item.createdAt}
-        />
-      ))}
+      {result.answers.length > 0 ? (
+        result.answers.map((item) => (
+          <AnswerCard
+            key={item._id}
+            clerkId={clerkId}
+            _id={item._id}
+            question={item.question}
+            author={item.author}
+            upvotes={item.upvotes.length}
+            createdAt={item.createdAt}
+          />
+        ))
+      ) : (
+        <div className="flex justify-center py-5">No answers posted</div>
+      )}
       <div className="mt-10">
         <Pagination
           pageNumber={searchParams?.page ? +searchParams?.page : 1}

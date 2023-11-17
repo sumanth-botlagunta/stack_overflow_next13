@@ -17,20 +17,24 @@ const QuestionTab = async ({ searchParams, userId, clerkId }: Props) => {
 
   return (
     <>
-      {result.questions.map((question) => (
-        <QuestionCard
-          key={question._id}
-          _id={question._id}
-          title={question.title}
-          tags={question.tags}
-          author={question.author}
-          upvotes={question.upvotes}
-          views={question.views}
-          answers={question.answers}
-          createdAt={question.createdAt}
-          clerkId={clerkId}
-        />
-      ))}
+      {result.questions.length > 0 ? (
+        result.questions.map((question) => (
+          <QuestionCard
+            key={question._id}
+            _id={question._id}
+            title={question.title}
+            tags={question.tags}
+            author={question.author}
+            upvotes={question.upvotes}
+            views={question.views}
+            answers={question.answers}
+            createdAt={question.createdAt}
+            clerkId={clerkId}
+          />
+        ))
+      ) : (
+        <div className="flex justify-center py-5">No questions Posted</div>
+      )}
       <div className="mt-10">
         <Pagination
           pageNumber={searchParams?.page ? +searchParams?.page : 1}

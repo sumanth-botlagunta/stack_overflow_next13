@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { toggleSaveQuestion } from '@/lib/actions/user.action';
 import { viewQuestion } from '@/lib/actions/interaction.action';
+import { toast } from '../ui/use-toast';
 
 type Props = {
   type: 'Question' | 'Answer';
@@ -98,13 +99,41 @@ const Votes = ({
     } finally {
       setLoading(false);
     }
-    // TODO: toast notification
+    let title, description;
+    if (voteType === 'upvote') {
+      if (hasupVoted) {
+        title = 'Upvote removed';
+        description = 'Your upvote has been removed';
+      } else {
+        title = 'Upvote submitted';
+        description = 'Your upvote has been submitted';
+      }
+    }
+    if (voteType === 'downvote') {
+      if (hasdownVoted) {
+        title = 'Downvote removed';
+        description = 'Your downvote has been removed';
+      } else {
+        title = 'Downvote submitted';
+        description = 'Your downvote has been submitted';
+      }
+    }
+    return toast({
+      title,
+      description,
+    });
   };
   const handleSave = async () => {
     await toggleSaveQuestion({
       userId: JSON.parse(userId),
       questionId: JSON.parse(itemId),
       path: pathname,
+    });
+    toast({
+      title: hasSaved ? 'Unsaved' : 'Saved',
+      description: hasSaved
+        ? 'Question has been unsaved'
+        : 'Question has been saved',
     });
   };
   return (

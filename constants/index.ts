@@ -6,6 +6,12 @@ export const themes = [
   { value: 'system', label: 'System', icon: '/assets/icons/computer.svg' },
 ];
 
+// {
+//   imgURL: '/assets/icons/suitcase.svg',
+//   route: '/jobs',
+//   label: 'Find Jobs',
+// },
+
 export const sidebarLinks: SidebarLink[] = [
   {
     imgURL: '/assets/icons/home.svg',
@@ -21,11 +27,6 @@ export const sidebarLinks: SidebarLink[] = [
     imgURL: '/assets/icons/star.svg',
     route: '/collection',
     label: 'Collections',
-  },
-  {
-    imgURL: '/assets/icons/suitcase.svg',
-    route: '/jobs',
-    label: 'Find Jobs',
   },
   {
     imgURL: '/assets/icons/tag.svg',

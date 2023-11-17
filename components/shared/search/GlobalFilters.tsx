@@ -48,8 +48,8 @@ const GlobalFilters = () => {
             className={`light-border-2 small-medium :text-light-800 rounded-2xl px-5 py-2 capitalize dark:hover:text-primary-500
               ${
                 active === item.value
-                  ? 'bg-primary-500 text-light-900'
-                  : 'bg-light-700 text-dark-400 hover:text-primary-500 dark:bg-dark-500'
+                  ? 'bg-primary-100 text-primary-500 hover:bg-primary-100 dark:bg-dark-300 dark:text-primary-500 dark:hover:bg-dark-500'
+                  : 'bg-light-800 text-light-500 hover:bg-light-800 dark:bg-dark-300 dark:text-light-500 dark:hover:bg-dark-300'
               }
             `}
             onClick={() => handleTypeClick(item.value)}

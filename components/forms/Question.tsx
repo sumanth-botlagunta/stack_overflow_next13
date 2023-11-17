@@ -22,6 +22,7 @@ import { createQuestion, editQuestion } from '@/lib/actions/question.action';
 import { useRouter, usePathname } from 'next/navigation';
 import { Schema } from 'mongoose';
 import { useTheme } from '@/context/ThemeProvider';
+import { toast } from '../ui/use-toast';
 
 interface Props {
   mongoUserId: Schema.Types.ObjectId;
@@ -60,6 +61,9 @@ const Question = ({ mongoUserId, type, questionDetails }: Props) => {
           path: pathname,
           questionId: parsedQuestionDetails?._id,
         });
+        toast({
+          title: 'Question edited successfully',
+        });
         router.push(`/question/${parsedQuestionDetails?._id}`);
       } else {
         await createQuestion({
@@ -69,7 +73,9 @@ const Question = ({ mongoUserId, type, questionDetails }: Props) => {
           author: mongoUserId,
           path: pathname,
         });
-
+        toast({
+          title: 'Question posted successfully',
+        });
         // navigate to home page
         router.push('/');
       }

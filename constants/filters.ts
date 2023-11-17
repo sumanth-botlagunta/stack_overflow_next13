@@ -26,11 +26,11 @@ export const TagFilters = [
   { name: "Old", value: "old" },
 ];
 
+// { name: "Recommended", value: "recommended" },
 export const HomePageFilters = [
-  { name: "Newest", value: "newest" },
-  { name: "Recommended", value: "recommended" },
-  { name: "Frequent", value: "frequent" },
-  { name: "Unanswered", value: "unanswered" },
+  { name: 'Newest', value: 'newest' },
+  { name: 'Frequent', value: 'frequent' },
+  { name: 'Unanswered', value: 'unanswered' },
 ];
 
 export const GlobalSearchFilters = [

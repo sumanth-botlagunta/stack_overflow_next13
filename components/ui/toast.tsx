@@ -1,3 +1,4 @@
+/* eslint-disable tailwindcss/no-custom-classname */
 import * as React from 'react';
 import * as ToastPrimitives from '@radix-ui/react-toast';
 import { cva, type VariantProps } from 'class-variance-authority';
@@ -27,9 +28,9 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border bg-background bg-white dark:bg-black text-foreground',
+        default: 'bg-background text-foreground border bg-white dark:bg-black',
         destructive:
-          'destructive group border-destructive bg-destructive text-destructive-foreground',
+          'destructive border-destructive bg-destructive text-destructive-foreground group',
       },
     },
     defaultVariants: {

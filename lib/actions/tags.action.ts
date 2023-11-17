@@ -45,33 +45,41 @@ export async function getAllTags(params: GetAllTagsParams) {
     if (searchQuery) {
       query.$or = [{ name: { $regex: new RegExp(escapedSearchQuery, 'i') } }];
     }
-    let sortOptions = {};
+    let sortOptions: Record<string, any>[] | Record<string, any> = [];
 
     switch (filter) {
       case 'popular':
-        sortOptions = { questions: -1 };
+        sortOptions = [
+          { $addFields: { questionsCount: { $size: '$questions' } } },
+          { $sort: { questionsCount: -1 } },
+        ];
         break;
       case 'recent':
-        sortOptions = { createdOn: -1 };
+        sortOptions = [{ $sort: { createdOn: -1 } }];
         break;
       case 'name':
-        sortOptions = { name: 1 };
+        sortOptions = [{ $sort: { name: 1 } }];
         break;
       case 'old':
-        sortOptions = { createdOn: 1 };
+        sortOptions = [{ $sort: { createdOn: 1 } }];
         break;
-
       default:
         break;
     }
 
-    const tags = await Tag.find(query)
-      .sort(sortOptions)
-      .skip(skipAmount)
-      .limit(pageSize);
+    const tags = await Tag.aggregate([
+      { $match: query },
+      ...(Array.isArray(sortOptions) ? sortOptions : [sortOptions]), // Spread the sort options into the aggregation pipeline
+      { $skip: skipAmount },
+      { $limit: pageSize },
+    ]);
+
     const totalTags = await Tag.countDocuments(query);
     const isNext = totalTags > skipAmount + pageSize;
+
     return { tags, isNext };
+
+    
   } catch (error) {
     console.log(error);
     throw error;

@@ -78,7 +78,7 @@ const GlobalResult = () => {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-2 max-h-72 overflow-y-scroll">
+          <div className="flex max-h-72 flex-col gap-2 overflow-y-scroll">
             {result.length > 0 ? (
               result.map((item: any, index: number) => (
                 <Link
